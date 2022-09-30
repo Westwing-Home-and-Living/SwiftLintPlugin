@@ -35,9 +35,19 @@ struct SwiftLintPlugin: BuildToolPlugin {
 
 #if canImport(XcodeProjectPlugin)
 import XcodeProjectPlugin
+import Foundation
 
 extension SwiftLintPlugin: XcodeBuildToolPlugin {
     func createBuildCommands(context: XcodePluginContext, target: XcodeTarget) throws -> [Command] {
+        let rootDirectory = context.xcodeProject.directory.appending(subpath: "..").string
+        let envFilePath = context.xcodeProject.directory.appending("..", ".env")
+        if
+            FileManager.default.fileExists(atPath: envFilePath.string),
+            let fileContents = try? String(contentsOf: URL(fileURLWithPath: envFilePath.string)),
+            fileContents.contains("SKIP_SWIFTLINT_BUILD_PHASE=true")
+        {
+            return []
+        }
         return [
             .buildCommand(
                 displayName: "Running SwiftLint for \(target.displayName)",
@@ -48,7 +58,7 @@ extension SwiftLintPlugin: XcodeBuildToolPlugin {
                     "--path",
                     context.xcodeProject.directory.string,
                     "--config",
-                    "\(context.xcodeProject.directory.string)/.swiftlint.yml",
+                    "\(rootDirectory)/.swiftlint.yml",
                     "--cache-path",
                     "\(context.pluginWorkDirectory.string)/cache"
                 ],
