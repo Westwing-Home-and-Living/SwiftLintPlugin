@@ -14,9 +14,7 @@
 
 A Swift Package Plugin for [SwiftLint](https://github.com/realm/SwiftLint/) that will run SwiftLint on build time and show errors & warnings in Xcode.
 
-Once SwiftLint offers their own implementation, this will be obsolete.
-
-> Implementation proposed [here](https://github.com/realm/SwiftLint/issues/3840#issuecomment-1085699163) by [@marcoboerner](https://github.com/marcoboerner).
+> ⚠️ There now is an official version in the [SwiftLint repo](https://github.com/realm/SwiftLint#plug-in-support)!
 
 ## Add to Package
 
@@ -25,7 +23,7 @@ First add a dependency from this package:
 ```swift
 dependencies: [
     // ...
-    .package(url: "https://github.com/lukepistrol/SwiftLintPlugin", from: "0.0.4"),
+    .package(url: "https://github.com/lukepistrol/SwiftLintPlugin", from: "0.2.2"),
 ]
 ```
 
@@ -50,6 +48,33 @@ Starting with Xcode 14, plugins can also work on Xcode Project's targets. To do 
 <img width="285" alt="Screen Shot 2022-09-02 at 09 33 23" src="https://user-images.githubusercontent.com/9460130/188084164-49903dc4-39a4-42fc-aa6f-6c6a813a7239.png">
 
 > You may need to enable & trust the plugin before you can actually run it during builds.
+
+## Fix Warnings
+
+As of version `0.1.0` this package also includes a command plugin which can be called on any target.
+
+1. Select a project or package in the project navigator.
+2. Richt-click and select `SwiftLintFix`.
+   - alternatively you can select `File > Packages > SwiftLintFix`.
+3. Choose the target(s) to run the `swiftlint --fix` command on.
+
+<img width="224" alt="Screenshot 2022-10-31 at 12 59 53" src="https://user-images.githubusercontent.com/9460130/199005629-b214758f-e184-4b3b-8031-e6364c6549c7.png">
+
+## Run on CI
+
+Important to notice is that when building a package/project on any CI provider (e.g. GitHub Actions) it is mandatory to pass the `-skipPackagePluginValidation` flag to the `xcodebuild` command. This will skip the validation prompt which in Xcode looks like this:
+
+<img width="263" alt="Screenshot 2022-12-13 at 17 48 44" src="https://user-images.githubusercontent.com/9460130/207394170-9490e687-e066-4bfa-862c-a4f816b6b43b.png">
+
+### Example
+
+```bash
+xcodebuild  \
+    -scheme "$SCHEME" \
+    -destination "$PLATFORM" \
+    -skipPackagePluginValidation \ # this is mandatory
+    clean build
+```
 
 -----
 
